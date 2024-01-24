@@ -79,7 +79,7 @@ predict_datas = pd.DataFrame()
 
 
 #==================================dataset split==============================
-np.random.seed(0) 
+np.random.seed(299) 
 a = np.arange(pos_num)
 b = np.random.choice(a, size=2085, replace=False)
 ind = np.zeros(20851, dtype=bool)
@@ -95,13 +95,14 @@ c = np.random.choice(index, 2085, replace=False)
 kfold = KFold(n_splits=k, shuffle=True, random_state=0)
 
 for n_kfold in range(n_kfolds):
-    for train_index, test_index in kfold.split(a):
-        ind_p = np.zeros(len(a), dtype=bool)
-        ind_p[train_index] = True
-        ind_n = np.zeros(len(a), dtype=bool)
-        ind_n[test_index] = True
-        sampler = RandomSampler_yz(res_ic50, res_binary, a[ind_p], a[ind_n], null_mask,b,c)
-#================================== end ====================================
+    for train_index, val_index in kfold.split(a):
+        train_i = np.zeros(len(a), dtype=bool)
+        train_i[train_index] = True
+        val_i = np.zeros(len(a), dtype=bool)
+        val_i[val_index] = True
+        sampler = RandomSampler_yz(res_ic50, res_binary, a[train_i], a[val_i], null_mask,b,c)
+
+#================================== split end ====================================
         gip_input = sampler.train_data.to_dense().numpy()
         cell_sim_gip = torch.from_numpy(gaussian_kernel_matrix(gip_input)).to(dtype=torch.float32, device='cuda:0')
         drug_sim_gip = torch.from_numpy(gaussian_kernel_matrix(gip_input.T)).to(dtype=torch.float32, device='cuda:0')
@@ -114,8 +115,8 @@ for n_kfold in range(n_kfolds):
                     G=G,drug_sub=drug_e,drug_mask=drug_mask,
                     drug_sim = drug_sim, cell_sim = cell_sim,device=args.device).to(args.device)
 
-        opt = Optimizer_mul(model, sampler.train_ic50, sampler.test_ic50, sampler.train_data, sampler.test_data, sampler.test_mask, sampler.train_mask,
-                            sampler.independ_data,sampler.ind_mask,sampler.ind_ic50,
+        opt = Optimizer_mul(model, sampler.train_ic50, sampler.val_ic50, sampler.train_data, sampler.val_data, sampler.val_mask, sampler.train_mask,
+                            sampler.test_data,sampler.test_mask,sampler.test_ic50,
                 roc_auc,ap_score, lr=args.lr, wd=args.wd, epochs=args.epochs, device=args.device).to(args.device)
         
         auc,aupr, true_data, best_predict = opt()
@@ -130,6 +131,9 @@ print('auc : ',np.mean(aucs))
 print('aupr : ',np.mean(auprs))
 
 logging.info(f"final_auc:{np.mean(aucs):.4f},var:{np.var(aucs)},final_aupr:{np.mean(auprs):.4f},var:{np.var(auprs)}")
+cv_set, test_set = save_dataset(sampler.test_mask,null_mask,res_binary)
+cv_set.to_csv("./HLMG/GDSC/Data/5-fold_CV.csv",index=False)
+test_set.to_csv("./HLMG/GDSC/Data/testset.csv",index=False)
 
 pd.DataFrame(true_datas).to_csv("./HLMG/GDSC/result_data/true_data.csv")
 pd.DataFrame(predict_datas).to_csv("./HLMG/GDSC/result_data/predict_data.csv")
