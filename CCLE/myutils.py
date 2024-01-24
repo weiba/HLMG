@@ -841,3 +841,21 @@ def generate_mask(row, column, mask_ratio):
     arr_mask = np.ma.masked_array(arr_mask_ratio, mask=(arr_mask_ratio < mask_ratio)).filled(0)
     arr_mask = np.ma.masked_array(arr_mask, mask=(arr_mask >= mask_ratio)).filled(1)
     return arr_mask
+
+def save_dataset(test_mask,null_mask,res):
+    vv = 1- (test_mask + null_mask)
+    vv = to_coo_matrix(vv)
+    row = pd.DataFrame(vv.row)
+    col = pd.DataFrame(vv.col)
+    data = pd.DataFrame(res[vv.row,vv.col])
+    v = pd.concat([row,col,data],axis=1)
+    v.columns = ['cells','drugs','labels']
+
+    tt = to_coo_matrix(test_mask)
+    row = pd.DataFrame(tt.row)
+    col = pd.DataFrame(tt.col)
+    data = pd.DataFrame(res[tt.row,tt.col])
+    t = pd.concat([row,col,data],axis=1)
+    t.columns = ['cells','drugs','labels']
+
+    return v, t

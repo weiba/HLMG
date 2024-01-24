@@ -91,11 +91,11 @@ kf = KFold(n_splits=5, shuffle=True,random_state=2023)
 kfold = KFold(n_splits=5, shuffle=True,random_state=2023)
 x, y = cell_drug.shape
 
-t_dim = 0  # you need set
+t_dim = 1  # you need set
 final_auc_d = []
 final_aupr_d = []
 
-for train_index, test_index in kf.split(np.arange(x)): # dim==0 : x  ;  dim==1 : y. you need set
+for train_index, test_index in kf.split(np.arange(y)): # dim==0 : x  ;  dim==1 : y. you need set
     null_mask = copy.deepcopy(null_mask1)
     train_p = copy.deepcopy(cell_drug)
     train_n = copy.deepcopy(cell_drug+null_mask - 1)
@@ -171,7 +171,7 @@ for train_index, test_index in kf.split(np.arange(x)): # dim==0 : x  ;  dim==1 :
     test_data = all_data[test_neg_index]
     test = sp.coo_matrix((test_data, (test_row, test_col)), shape=cell_drug.shape)
     train = sp.coo_matrix(pos_adj_mat)
-    banlence_mask = mask(train, test, dtype=bool)   
+    banlence_mask = mask(train, test, dtype=bool)   # independent test set
 
 #==========================================================================
 
@@ -179,7 +179,7 @@ for train_index, test_index in kf.split(np.arange(x)): # dim==0 : x  ;  dim==1 :
 
         true_data_s = pd.DataFrame()
         predict_data_s = pd.DataFrame()
-        sam = RandomSampler(new_A, train_ind, test_ind, null_mask)
+        sam = RandomSampler(new_A, train_ind, test_ind, null_mask) #  cross-validation set
 
         auc,aupr,true_data, predict_data = HLMG_new(cell_exprs=exprs,drug_finger=drug_finger,
                                                             sam=sam,gip=new_A,test_da=cell_drug,test_ma=banlence_mask,
