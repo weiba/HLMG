@@ -53,7 +53,8 @@ All implementations of HLMG are based on PyTorch. HLMG requires the following de
 ## Preprocessing your own data
 Explanations on how you can process your own data and prepare it for HLMG running.
 
-> In our study, we followed the data preprocessing steps described in MOLI[1] , and the data preprocessing code was derived from [MOLI](https://github.com/hosseinshn/MOLI). The cell line pathway data followed the steps described in DRPreter[2], with data and code from [DRPreter](https://github.com/babaling/DRPreter). 
+> In our study, we followed the data preprocessing steps described in MOLI[1] , and the data preprocessing code was derived from [MOLI](https://github.com/hosseinshn/MOLI). The cell line pathway data followed the steps described in DRPreter[2], with data and code from [DRPreter](https://github.com/babaling/DRPreter).
+> 
 > [1]Sharifi-Noghabi, H., et al. MOLI: multi-omics late integration with deep neural networks for drug response prediction. Bioinformatics 2019;35(14):i501-i509.[2]Shin, J., et al. DRPreter: Interpretable Anticancer Drug Response Prediction Using Knowledge-Guided Graph Neural Networks and Transformer. International Journal of Molecular Sciences 2022;23(22):13919.
 
 > You can download the processing data via the link above, or use the data provided in the GDSC/Data/ and CCLE/Data folders
